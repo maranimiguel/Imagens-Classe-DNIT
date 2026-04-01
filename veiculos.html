@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificação DNIT - Consultoria de Tráfego</title>
+    <style>
+        :root {
+            --primary: #3C096C;
+            --accent: #FBC02D;
+            --danger: #D32F2F;
+            --bg: #F5F5F5;
+            --white: #FFFFFF;
+            --text-dark: #2D2D2D;
+            --text-light: #666666;
+            --card-border: #E0E0E0;
+            --es-color: #4CAF50; 
+            --td-color: #2196F3; 
+            --tt-color: #9C27B0; 
+            --ed-color: #607D8B; 
+            --ced-color: #795548; 
+        }
+
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg); color: var(--text-dark); margin: 0; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        header { 
+            background: var(--primary); 
+            color: var(--white); 
+            padding: 30px; 
+            border-radius: 12px; 
+            margin-bottom: 20px;
+            border-bottom: 5px solid var(--accent);
+        }
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { margin: 5px 0 0 0; opacity: 0.8; }
+
+        .legenda-container {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+        .legenda-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-dark); }
+        .legenda-title { font-weight: 800; text-transform: uppercase; font-size: 0.75rem; color: var(--text-light); width: 100%; margin-bottom: 5px; }
+
+        .section-title { 
+            grid-column: 1 / -1; 
+            color: var(--primary); 
+            border-bottom: 2px solid var(--primary);
+            margin: 20px 0; 
+            padding-bottom: 5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .grid-veiculos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+
+		.card-image {
+            width: 100%;
+            height: 120px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .card-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%) contrast(120%); /* Estilo técnico similar ao manual */
+        }
+
+        .card-header {
+            padding: 15px;
+            background: #fcfcfc;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header .title { font-weight: 700; color: var(--primary); font-size: 0.9rem; }
+        .classe-badge { background: var(--accent); color: var(--primary); padding: 3px 10px; border-radius: 5px; font-weight: 900; font-size: 0.8rem; }
+
+        .card-body { padding: 20px; }
+        .spec-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #fafafa; }
+        .spec-label { color: var(--text-light); font-size: 0.85rem; }
+        .spec-value { font-weight: 600; font-size: 0.9rem; }
+        .pbt { color: var(--danger); font-size: 1.1rem; font-weight: 800; }
+
+        .eixos-container { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .eixo-obj {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+
+        .es { background-color: var(--es-color); } 
+        .td { background-color: var(--td-color); }
+        .tt { background-color: var(--tt-color); }
+        .ed { background-color: var(--ed-color); }
+        .ced { background-color: var(--ced-color); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Guia Técnico de Classificação de Veículos</h1>
+        <p>Referência baseada no Manual de Estudos de Tráfego - DNIT</p>
+    </header>
+
+    <div class="legenda-container">
+        <div class="legenda-title">Legenda de Configuração de Eixos e Cargas Máximas (CM)</div>
+        <div class="legenda-item"><div class="eixo-obj es">ES</div> <span>Eixo Simples, Rodagem Simples (6t)</span></div>
+        <div class="legenda-item"><div class="eixo-obj ed">ED</div> <span>Eixo Simples, Rodagem Dupla (10t)</span></div>
+        <div class="legenda-item"><div class="eixo-obj td">TD</div> <span>Conjunto Tandem Duplo (17t)</span></div>
+        <div class="legenda-item"><div class="eixo-obj tt">TT</div> <span>Conjunto Tandem Triplo (25,5t)</span></div>
+        <div class="legenda-item"><div class="eixo-obj ced">CED</div> <span>Conjunto de Eixos Direcionais (12t)</span></div>
+    </div>
+
+    <div class="grid-veiculos">
+        
+        <div class="section-title">Unidades de Tração e Rígidos</div>
+
+		<div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2C.png" alt="Silhueta 2C">
+            </div>
+            <div class="card-header"><span class="title">Caminhão Simples</span><span class="classe-badge">2C</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">2</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">16,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3C.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão Trucado</span><span class="classe-badge">3C</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">3</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">23,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/4C.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão Simples (Tandem Triplo)</span><span class="classe-badge">4C</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">31,5 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj tt">E2E3E4: TT (25,5t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/4CD.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão Duplo Direcional Trucado</span><span class="classe-badge">4CD</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">29,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj ced">E1E2: CED (12t)</div>
+                    <div class="eixo-obj td">E3E4: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Caminhão Trator + Semi-Reboque</div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2S1.png" alt="Silhueta 2C">
+			</div> 
+           <div class="card-header"><span class="title">Cavalo Simples + Semi 1 Eixo</span><span class="classe-badge">2S1</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">3</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">26,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2S2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Simples + Semi 2 Eixos</span><span class="classe-badge">2S2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">33,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj td">E3E4: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2I2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Simples + Semi (2 Isolados)</span><span class="classe-badge">2I2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">36,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2S3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Simples + Semi 3 Eixos (TT)</span><span class="classe-badge">2S3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">41,5 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj tt">E3E4E5: TT (25,5t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2I3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Simples + Semi (3 Isolados)</span><span class="classe-badge">2I3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">45,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj ed">E5: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2J3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Simples + Semi (Isolado + TD)</span><span class="classe-badge">2J3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">43,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3S1.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi 1 Eixo</span><span class="classe-badge">3S1</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">33,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3I2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi (2 Isolados)</span><span class="classe-badge">3I2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">43,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj ed">E5: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3S2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi 2 Eixos</span><span class="classe-badge">3S2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">40,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3S3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi 3 Eixos (TT)</span><span class="classe-badge">3S3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">6</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">45,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj tt">E4E5E6: TT (25,5t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3J3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi (Isolado + TD)</span><span class="classe-badge">3J3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">6</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">45,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj td">E5E6: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3I3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Cavalo Trucado + Semi (3 Isolados)</span><span class="classe-badge">3I3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">6</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">45,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj ed">E5: ED (10t)</div>
+                    <div class="eixo-obj ed">E6: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-title">Caminhão + Reboque</div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2C2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão + Reboque (Eixos Distanciados)</span><span class="classe-badge">2C2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">36,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2C3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão + Reboque (Tandem Final)</span><span class="classe-badge">2C3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">43,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3C2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão Trucado + Reboque</span><span class="classe-badge">3C2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">5</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">43,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj ed">E5: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3C3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Caminhão Trucado + Reboque (Tandem Final)</span><span class="classe-badge">3C3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">6</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">45,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj td">E5E6: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="section-title">Combinações Pesadas (CVC)</div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3D3.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Romeu e Julieta (Tandem)</span><span class="classe-badge">3D3</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">6</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">50,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj td">E5E6: TD (17t)</div>
+                </div>
+            </div>
+        </div>      
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3D4.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Romeu e Julieta</span><span class="classe-badge">3D4</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">7</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">57,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                    <div class="eixo-obj td">E6E7: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3Q4.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Treminhão</span><span class="classe-badge">3Q4</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">7</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">63,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                    <div class="eixo-obj ed">E5: ED (10t)</div>
+                    <div class="eixo-obj ed">E6: ED (10t)</div>
+                    <div class="eixo-obj ed">E7: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3T6.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Tri-trem</span><span class="classe-badge">3T6</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">9</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">74,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                    <div class="eixo-obj td">E6E7: TD (17t)</div>
+                    <div class="eixo-obj td">E8E9: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3T6R.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Rodotrem</span><span class="classe-badge">3T6 (R)</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">9</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">74,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD (17t)</div>
+                    <div class="eixo-obj td">E4E5: TD (17t)</div>
+                    <div class="eixo-obj td">E6E7: TD (17t)</div>
+                    <div class="eixo-obj td">E8E9: TD (17t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Transporte de Passageiros</div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2CB.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Ônibus Convencional</span><span class="classe-badge">2CB</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">2</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">16,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/3CB.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Ônibus Trucado</span><span class="classe-badge">3CB</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">3</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">19,5 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj td">E2E3: TD-6P (13,5t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2SB1.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Ônibus Urbano Articulado</span><span class="classe-badge">2SB1</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">3</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">26,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/4CB.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Ônibus Duplo Direcional</span><span class="classe-badge">4CB</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">25,5 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj ced">E1E2: CED (12t)</div>
+                    <div class="eixo-obj td">E3E4: TD-6P (13,5t)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-image">
+                <img src="https://raw.githubusercontent.com/maranimiguel/Imagens-Classe-DNIT/refs/heads/main/ve%C3%ADculos/2IB2.png" alt="Silhueta 2C">
+			</div>
+            <div class="card-header"><span class="title">Ônibus Urbano Bi-Articulado</span><span class="classe-badge">2IB2</span></div>
+            <div class="card-body">
+                <div class="spec-row"><span class="spec-label">Eixos</span><span class="spec-value">4</span></div>
+                <div class="spec-row"><span class="spec-label">PBT Máx</span><span class="spec-value pbt">36,0 t</span></div>
+                <div class="eixos-container">
+                    <div class="eixo-obj es">E1: ES (6t)</div>
+                    <div class="eixo-obj ed">E2: ED (10t)</div>
+                    <div class="eixo-obj ed">E3: ED (10t)</div>
+                    <div class="eixo-obj ed">E4: ED (10t)</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
